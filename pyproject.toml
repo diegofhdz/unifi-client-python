@@ -25,7 +25,9 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Typing :: Typed",
 ]
-dependencies = []
+dependencies = [
+    "requests"
+]
 
 [project.optional-dependencies]
 dev = [
@@ -41,7 +43,7 @@ Repository = "https://github.com/diegofhdz/unifi-client-python"
 Issues = "https://github.com/diegofhdz/unifi-client-python/issues"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["unifi"]
 
 [tool.ruff]
 line-length = 88
