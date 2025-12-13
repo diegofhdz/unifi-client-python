@@ -154,24 +154,5 @@ class UniFiApiClient:
         self.close()
 
     def __del__(self):
-        """Cleanup on garbage collection"""
         self.close()
 
-
-if __name__ == "__main__":
-    with UniFiApiClient(api_key="test123") as client:
-        data = client.list_hosts()
-        print(data)
-
-    client = UniFiApiClient(
-        api_key="test123",
-        session_ttl_minutes=55,  # Refresh before 60min expiry
-    )
-
-    try:
-        data = client.list_hosts()
-
-        client.refresh_session()
-
-    finally:
-        client.close()
