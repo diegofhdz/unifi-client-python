@@ -3,6 +3,7 @@ from typing import Optional, Any
 import logging
 from datetime import datetime, timedelta
 from threading import Lock
+from requests.adapters import HTTPAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +68,7 @@ class UniFiApiClient:
             }
         )
 
-        adapter = requests.adapters.HTTPAdapter(
+        adapter = HTTPAdapter(
             pool_connections=10, pool_maxsize=20, max_retries=3, pool_block=False
         )
         session.mount("https://", adapter)
@@ -111,7 +112,7 @@ class UniFiApiClient:
             params["nextToken"] = next_token
 
         try:
-            response = self.session.get()
+            response = self.session.get(
                 url=url, params=params, timeout=self.timeout
             )
             response.raise_for_status()
