@@ -9,8 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 class UniFiApiError(Exception):
-    """Custom exception for UniFi API errors"""
-
+    """
+    Custom exception for UniFi API errors
+    """
     pass
 
 
@@ -171,7 +172,7 @@ class UniFiApiClient:
             if e.response.status_code in (401, 403):
                 logger.warning("Authentication error, attempting session refresh")
                 self.refresh_session()
-                response = self.session.get(url, params=params, timeout=self.timeout)
+                response = self.session.get(url, timeout=self.timeout)
                 response.raise_for_status()
                 return response.json()
 
@@ -264,6 +265,8 @@ class UniFiApiClient:
         """
         if not 1 <= page_size <= 100:
             raise ValueError("page_size must be between 1 and 100")
+        
+        # TODO: Do String -> Datetime format check
 
         url = f"{self.base_url}/sites"
         params = {"pageSize": str(page_size)}
@@ -300,6 +303,82 @@ class UniFiApiClient:
             logger.error(f"Invalid JSON response: {str(e)}")
             raise UniFiApiError("Invalid JSON response from API")
     
+    def get_isp_metrics(
+        self, type: str = "5m", begin_timestamp: Optional[str] = None, end_timestamp: Optional[str] = None, duration: Optional[str] = None 
+    ) -> dict[str, str]:
+        """
+        Retrieves ISP metrics data for all sites linked to the UI account's API key. 
+        5-minute interval metrics are available for at least 24 hours, and 1-hour interval metrics are available for at least 30 days.
+
+        Args:
+            type: Specifies whether metrics are returned using 5m or 1h intervals.
+            begin_timestamp: The earliest timestamp to retrieve data from (RFC3339 format)
+            end_timestamp: The latest timestamp to retrieve data up to (RFC3339 format)
+            duration: Specifies the time range of metrics to retrieve, starting from when the request is made. 
+            Supports 24h for 5-minute metrics, and 7d or 30d for 1-hour metrics. 
+            This parameter cannot be used with beginTimestamp or endTimestamp.
+
+        Returns:
+            Parsed JSON response as dictionary
+
+        Raises:
+            UniFiApiError: If the API request fails
+            ValueError: If page_size is invalid
+        """
+        if type not in ("5m", "1h"):
+            raise ValueError("type parameter must be either '5m' or '1h'")
+        
+        if duration and (begin_timestamp or end_timestamp):
+            raise ValueError("Duration parameter cannot be used with begin_timestamp or end_timestamp.")
+        
+        if (begin_timestamp and end_timestamp):
+            pass
+            # Assert Begin timestamp < end_timestamp
+
+        # TODO: Do String -> Datetime format check
+
+        base_url = f"{self.base_url.split('/')[-2]}/ea"
+        url = f"{base_url}/isp-metrics/{type}"
+
+        params = {}
+
+        if duration:
+            params["duration"] = duration
+
+        if begin_timestamp:
+            params["beginTimestamp"] = begin_timestamp
+        
+        if end_timestamp: 
+            params["endTimestaml"] = end_timestamp
+
+        try:
+            response = self.session.get(
+                url=url, params=params, timeout=self.timeout
+            )
+            response.raise_for_status()
+            return response.json()
+
+        except requests.HTTPError as e:
+            # If 401/403, might be auth issue - try refresh once
+            if e.response.status_code in (401, 403):
+                logger.warning("Authentication error, attempting session refresh")
+                self.refresh_session()
+                response = self.session.get(url, params=params, timeout=self.timeout)
+                response.raise_for_status()
+                return response.json()
+
+            logger.error(f"HTTP error: {e.response.status_code} - {e.response.text}")
+            raise UniFiApiError(f"API request failed: {e.response.status_code}")
+
+        except requests.Timeout:
+            logger.error(f"Request timed out after {self.timeout} seconds")
+            raise UniFiApiError("Request timed out")
+        except requests.RequestException as e:
+            logger.error(f"Request failed: {str(e)}")
+            raise UniFiApiError(f"Request failed: {str(e)}")
+        except ValueError as e:
+            logger.error(f"Invalid JSON response: {str(e)}")
+            raise UniFiApiError("Invalid JSON response from API")
 
     def close(self) -> None:
         """Close the session"""
