@@ -1,9 +1,9 @@
 import requests
-from typing import Optional, Any
 import logging
 from datetime import datetime, timedelta
 from threading import Lock
 from requests.adapters import HTTPAdapter
+from typing import Optional, Any
 
 logger = logging.getLogger(__name__)
 
@@ -139,6 +139,167 @@ class UniFiApiClient:
         except ValueError as e:
             logger.error(f"Invalid JSON response: {str(e)}")
             raise UniFiApiError("Invalid JSON response from API")
+        
+    def get_host_by_id(self, host_id: str) -> dict[str, str]:
+        """
+        Retrieves detailed information about a specific host by ID.
+        
+        Args:
+            host_id: Unique identifier of the host
+
+        Returns:
+            Parsed JSON response as dictionary
+
+        Raises:
+            UniFiApiError: If the API request fails
+            ValueError: If page_size is invalid
+        """
+        if len(host_id) == 0:
+            raise ValueError("Please enter a valid host_id")
+        
+        url = f"{self.base_url}/{host_id}"
+        
+        try:
+            response = self.session.get(
+                url=url, timeout=self.timeout
+            )
+            response.raise_for_status()
+            return response.json()
+
+        except requests.HTTPError as e:
+            # If 401/403, might be auth issue - try refresh once
+            if e.response.status_code in (401, 403):
+                logger.warning("Authentication error, attempting session refresh")
+                self.refresh_session()
+                response = self.session.get(url, params=params, timeout=self.timeout)
+                response.raise_for_status()
+                return response.json()
+
+            logger.error(f"HTTP error: {e.response.status_code} - {e.response.text}")
+            raise UniFiApiError(f"API request failed: {e.response.status_code}")
+
+        except requests.Timeout:
+            logger.error(f"Request timed out after {self.timeout} seconds")
+            raise UniFiApiError("Request timed out")
+        except requests.RequestException as e:
+            logger.error(f"Request failed: {str(e)}")
+            raise UniFiApiError(f"Request failed: {str(e)}")
+        except ValueError as e:
+            logger.error(f"Invalid JSON response: {str(e)}")
+            raise UniFiApiError("Invalid JSON response from API")
+        
+    def list_sites(
+        self, page_size: int = 10, next_token: Optional[str] = None
+    ) -> dict[str, str]:
+        """
+        Retrieves a list of all sites (from hosts running the UniFi Network application) associated with the UI account making the API call.
+
+        Args:
+            page_size: Number of results per page (1-100)
+            next_token: Token for pagination
+
+        Returns:
+            Parsed JSON response as dictionary
+
+        Raises:
+            UniFiApiError: If the API request fails
+            ValueError: If page_size is invalid
+        """
+        if not 1 <= page_size <= 100:
+            raise ValueError("page_size must be between 1 and 100")
+
+        url = f"{self.base_url}/sites"
+        params = {"pageSize": str(page_size)}
+
+        if next_token:
+            params["nextToken"] = next_token
+
+        try:
+            response = self.session.get(
+                url=url, params=params, timeout=self.timeout
+            )
+            response.raise_for_status()
+            return response.json()
+
+        except requests.HTTPError as e:
+            # If 401/403, might be auth issue - try refresh once
+            if e.response.status_code in (401, 403):
+                logger.warning("Authentication error, attempting session refresh")
+                self.refresh_session()
+                response = self.session.get(url, params=params, timeout=self.timeout)
+                response.raise_for_status()
+                return response.json()
+
+            logger.error(f"HTTP error: {e.response.status_code} - {e.response.text}")
+            raise UniFiApiError(f"API request failed: {e.response.status_code}")
+
+        except requests.Timeout:
+            logger.error(f"Request timed out after {self.timeout} seconds")
+            raise UniFiApiError("Request timed out")
+        except requests.RequestException as e:
+            logger.error(f"Request failed: {str(e)}")
+            raise UniFiApiError(f"Request failed: {str(e)}")
+        except ValueError as e:
+            logger.error(f"Invalid JSON response: {str(e)}")
+            raise UniFiApiError("Invalid JSON response from API")
+
+    def list_devices(
+        self, time: Optional[str] = None, host_ids: Optional[list[str]] = None , page_size: int = 10, next_token: Optional[str] = None
+    ) -> dict[str, str]:
+        """
+        Retrieves a list of UniFi devices managed by hosts where the UI account making the API call is the owner or a super admin.
+
+        Args:
+            page_size: Number of results per page (1-100)
+            next_token: Token for pagination
+            time: Last processed timestamp of devices in RFC3339 format. Example: 2025-06-17T02:45:58Z
+            host_ids: List of host IDs to filter the results
+
+        Returns:
+            Parsed JSON response as dictionary
+
+        Raises:
+            UniFiApiError: If the API request fails
+            ValueError: If page_size is invalid
+        """
+        if not 1 <= page_size <= 100:
+            raise ValueError("page_size must be between 1 and 100")
+
+        url = f"{self.base_url}/sites"
+        params = {"pageSize": str(page_size)}
+
+        if next_token:
+            params["nextToken"] = next_token
+
+        try:
+            response = self.session.get(
+                url=url, params=params, timeout=self.timeout
+            )
+            response.raise_for_status()
+            return response.json()
+
+        except requests.HTTPError as e:
+            # If 401/403, might be auth issue - try refresh once
+            if e.response.status_code in (401, 403):
+                logger.warning("Authentication error, attempting session refresh")
+                self.refresh_session()
+                response = self.session.get(url, params=params, timeout=self.timeout)
+                response.raise_for_status()
+                return response.json()
+
+            logger.error(f"HTTP error: {e.response.status_code} - {e.response.text}")
+            raise UniFiApiError(f"API request failed: {e.response.status_code}")
+
+        except requests.Timeout:
+            logger.error(f"Request timed out after {self.timeout} seconds")
+            raise UniFiApiError("Request timed out")
+        except requests.RequestException as e:
+            logger.error(f"Request failed: {str(e)}")
+            raise UniFiApiError(f"Request failed: {str(e)}")
+        except ValueError as e:
+            logger.error(f"Invalid JSON response: {str(e)}")
+            raise UniFiApiError("Invalid JSON response from API")
+    
 
     def close(self) -> None:
         """Close the session"""
