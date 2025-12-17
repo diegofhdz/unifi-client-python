@@ -275,7 +275,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Changelog
 
-### 0.1.0 (2024-XX-XX)
+### 0.1.0 (Unreleased)
 
 - Initial release
 - Support for Hosts, Sites, Devices, ISP Metrics, and SD-WAN endpoints
