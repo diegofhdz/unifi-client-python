@@ -21,7 +21,7 @@ pip install unifi-client-python
 ### Development Installation
 
 ```bash
-git clone https://github.com/yourusername/unifi-client-python.git
+git clone https://github.com/diegofhdz/unifi-client-python.git
 cd unifi-client-python
 pip install -e ".[dev]"
 ```
