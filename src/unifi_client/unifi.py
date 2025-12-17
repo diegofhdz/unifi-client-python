@@ -3,8 +3,7 @@ import logging
 from datetime import datetime, timedelta
 from threading import Lock
 from requests.adapters import HTTPAdapter
-from typing import Optional, Any, Callable, Dict, List
-from functools import wraps
+from typing import Optional, Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
@@ -151,15 +150,10 @@ class UniFiApiClient:
             logger.error(f"Invalid JSON response: {str(e)}")
             raise UniFiApiError("Invalid JSON response from API") from e
 
-    @staticmethod
-    def _validate_page_size(func: Callable) -> Callable:
-        """Decorator to validate page_size parameter"""
-        @wraps(func)
-        def wrapper(self, *args, page_size: int = 10, **kwargs):
-            if not 1 <= page_size <= 100:
-                raise ValueError("page_size must be between 1 and 100")
-            return func(self, *args, page_size=page_size, **kwargs)
-        return wrapper
+    def _validate_page_size(self, page_size: int) -> None:
+        """Validate page_size parameter"""
+        if not 1 <= page_size <= 100:
+            raise ValueError("page_size must be between 1 and 100")
 
     def _validate_rfc3339(self, timestamp: str) -> datetime:
         """
@@ -209,7 +203,6 @@ class UniFiApiClient:
         if end_dt <= begin_dt:
             raise ValueError("'end_timestamp' must be strictly greater than 'begin_timestamp'")
 
-    @_validate_page_size
     def list_hosts(
         self,
         page_size: int = 10,
@@ -229,6 +222,7 @@ class UniFiApiClient:
             UniFiApiError: If the API request fails
             ValueError: If page_size is invalid
         """
+        self._validate_page_size(page_size)
         params = {"pageSize": str(page_size)}
         if next_token:
             params["nextToken"] = next_token
@@ -254,7 +248,6 @@ class UniFiApiClient:
 
         return self._make_request("GET", f"hosts/{host_id}")
 
-    @_validate_page_size
     def list_sites(
         self,
         page_size: int = 10,
@@ -275,13 +268,13 @@ class UniFiApiClient:
             UniFiApiError: If the API request fails
             ValueError: If page_size is invalid
         """
+        self._validate_page_size(page_size)
         params = {"pageSize": str(page_size)}
         if next_token:
             params["nextToken"] = next_token
 
         return self._make_request("GET", "sites", params=params)
 
-    @_validate_page_size
     def list_devices(
         self,
         time: Optional[str] = None,
@@ -306,6 +299,7 @@ class UniFiApiClient:
             UniFiApiError: If the API request fails
             ValueError: If page_size is invalid or time format is invalid
         """
+        self._validate_page_size(page_size)
         if time:
             self._validate_rfc3339(time)
 
