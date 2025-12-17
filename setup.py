@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name="unifi-client-python",
     version="0.1.0",
-    author="Diego",
+    author="Diego Hernandez",
     author_email="diego.hdz6263@gmail.com",
     description="A Python client for the UniFi Site Manager API",
     long_description=long_description,
