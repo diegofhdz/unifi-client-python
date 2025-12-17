@@ -286,9 +286,9 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Links
 
 - [UniFi Site Manager API Documentation](https://developer.ui.com/site-manager-api/gettingstarted)
-- [GitHub Repository](https://github.com/yourusername/unifi-client-python)
-- [Issue Tracker](https://github.com/yourusername/unifi-client-python/issues)
+- [GitHub Repository](https://github.com/diegofhdz/unifi-client-python)
+- [Issue Tracker](https://github.com/diegofhdz/unifi-client-python/issues)
 
 ## Support
 
-For bugs, feature requests, or questions, please [open an issue](https://github.com/yourusername/unifi-client-python/issues) on GitHub.
+For bugs, feature requests, or questions, please [open an issue](https://github.com/diegofhdz/unifi-client-python/issues) on GitHub.
