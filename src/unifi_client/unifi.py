@@ -3,7 +3,7 @@ import logging
 from datetime import datetime, timedelta
 from threading import Lock
 from requests.adapters import HTTPAdapter
-from typing import Optional, Any, Callable
+from typing import Optional, Any, Callable, Dict, List
 from functools import wraps
 
 logger = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ class UniFiApiClient:
         endpoint: str,
         params: Optional[dict] = None,
         **kwargs
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """
         Centralized request handler with automatic retry on auth failures.
 
@@ -214,7 +214,7 @@ class UniFiApiClient:
         self,
         page_size: int = 10,
         next_token: Optional[str] = None
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """
         List UniFi hosts with pagination support.
 
@@ -235,7 +235,7 @@ class UniFiApiClient:
 
         return self._make_request("GET", "hosts", params=params)
 
-    def get_host_by_id(self, host_id: str) -> dict[str, Any]:
+    def get_host_by_id(self, host_id: str) -> Dict[str, Any]:
         """
         Retrieves detailed information about a specific host by ID.
 
@@ -259,7 +259,7 @@ class UniFiApiClient:
         self,
         page_size: int = 10,
         next_token: Optional[str] = None
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """
         Retrieves a list of all sites (from hosts running the UniFi Network application)
         associated with the UI account making the API call.
@@ -285,10 +285,10 @@ class UniFiApiClient:
     def list_devices(
         self,
         time: Optional[str] = None,
-        host_ids: Optional[list[str]] = None,
+        host_ids: Optional[List[str]] = None,
         page_size: int = 10,
         next_token: Optional[str] = None
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """
         Retrieves a list of UniFi devices managed by hosts where the UI account
         making the API call is the owner or a super admin.
@@ -326,7 +326,7 @@ class UniFiApiClient:
         begin_timestamp: Optional[str] = None,
         end_timestamp: Optional[str] = None,
         duration: Optional[str] = None
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """
         Retrieves ISP metrics data for all sites linked to the UI account's API key.
         5-minute interval metrics are available for at least 24 hours, and 1-hour
@@ -375,9 +375,9 @@ class UniFiApiClient:
         begin_timestamp: Optional[str] = None,
         end_timestamp: Optional[str] = None,
         duration: Optional[str] = None,
-        site_ids: Optional[list[str]] = None,
-        host_ids: Optional[list[str]] = None
-    ) -> dict[str, Any]:
+        site_ids: Optional[List[str]] = None,
+        host_ids: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
         """
         Retrieves ISP metrics data based on specific query parameters.
         5-minute interval metrics are available for at least 24 hours, and 1-hour
@@ -429,7 +429,7 @@ class UniFiApiClient:
 
         return self._make_request("POST", f"ea/isp-metrics/{type}/query", json=body)
 
-    def list_sd_wan_configs(self) -> dict[str, Any]:
+    def list_sd_wan_configs(self) -> Dict[str, Any]:
         """
         Retrieves a list of all SD-WAN configurations associated with the UI account
         making the API call.
@@ -442,7 +442,7 @@ class UniFiApiClient:
         """
         return self._make_request("GET", "ea/sd-wan-configs")
 
-    def get_sd_wan_config_by_id(self, config_id: str) -> dict[str, Any]:
+    def get_sd_wan_config_by_id(self, config_id: str) -> Dict[str, Any]:
         """
         Retrieves detailed information about a specific SD-WAN configuration by ID.
 
@@ -461,7 +461,7 @@ class UniFiApiClient:
 
         return self._make_request("GET", f"ea/sd-wan-configs/{config_id}")
 
-    def get_sd_wan_config_status(self, config_id: str) -> dict[str, Any]:
+    def get_sd_wan_config_status(self, config_id: str) -> Dict[str, Any]:
         """
         Retrieves the status of a specific SD-WAN configuration, including deployment
         progress, errors, and associated hubs.
