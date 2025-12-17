@@ -1,7 +1,8 @@
-"""UniFi Python Client Library.
-
-A Python client library for interacting with the UniFi Network Controller API.
+"""
+UniFi Client Python - A Python client for the UniFi Site Manager API
 """
 
+from unifi_client.unifi import UniFiApiClient, UniFiApiError
+
 __version__ = "0.1.0"
-__all__ = ["__version__"]
+__all__ = ["UniFiApiClient", "UniFiApiError"]
