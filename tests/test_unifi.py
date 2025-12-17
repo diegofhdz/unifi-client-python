@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
 import requests
 from unifi_client.unifi import UniFiApiClient, UniFiApiError
